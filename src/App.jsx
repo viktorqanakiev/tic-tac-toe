@@ -2,6 +2,7 @@ import { useState } from "react";
 import Player from "./components/Player.jsx";
 import GameBoard from "./components/GameBoard.jsx";
 import Log from "./components/log.jsx";
+import GameOver from "./components/GameOver.jsx";
 import { WINNING_COMBINATIONS } from "./winning-combinations.js";
 
 const initialGameBoard = [
@@ -23,8 +24,8 @@ function deriveACtivePlayer(gameTurns) {
 function App() {
   const [gameTurns, setGameTurns] = useState([]);
   const activePlayer = deriveACtivePlayer(gameTurns);
-
-  let gameBoard = initialGameBoard;
+  //makeing a deep copy of the initial array
+  let gameBoard = [...initialGameBoard.map(array => [...array])];
 
   for (const turn of gameTurns) {
     const { square, player } = turn;
@@ -46,6 +47,8 @@ function App() {
       }
   }
 
+  const hasDraw = gameTurns.length === 9 && !winner;
+
   function handleSelectSquare(rowIndex, colIndex) {
     setGameTurns((prevTurns) => {
       const currentPlayer = deriveACtivePlayer(prevTurns);
@@ -56,6 +59,10 @@ function App() {
       ];
       return updatedTurns;
     });
+  }
+
+  function handleRestart(){
+    setGameTurns([]);
   }
   return (
     <main>
@@ -73,7 +80,7 @@ function App() {
           />
         </ol>
         {/* We check if we have a winner and the print it */}
-        {winner && <p>You won, {winner}!</p>}
+        {(winner || hasDraw) && <GameOver winner={winner} onRestart={handleRestart}/>}
         <GameBoard onSelectSquare={handleSelectSquare} board={gameBoard} />
       </div>
       <Log turns={gameTurns} />
